@@ -4,42 +4,50 @@
 
  - (void)getCookieValue:(CDVInvokedUrlCommand*)command
 {
-    CDVPluginResult* pluginResult = nil;
+   CDVPluginResult* pluginResult = nil;
 
     NSString* urlString = [command.arguments objectAtIndex:0];
     __block NSString* cookieName = [command.arguments objectAtIndex:1];
 
     if (urlString != nil)
     {
-        NSArray* cookies = [[NSHTTPCookieStorage sharedHTTPCookieStorage] cookiesForURL:[NSURL URLWithString:urlString]];
-        __block NSString *cookieValue;
-
-        [cookies enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
-            NSHTTPCookie *cookie = obj;
-
-            if([cookie.name isEqualToString:cookieName])
-            {
-                cookieValue = cookie.value;
-                *stop = YES;
-            }
-        }];
-
-        if (cookieValue != nil)
+        if (@available(iOS 11.0, *)) {
+            WKWebsiteDataStore* dataStore = [WKWebsiteDataStore defaultDataStore];
+            WKHTTPCookieStore* cookieStore = dataStore.httpCookieStore;
+            [cookieStore getAllCookies:^(NSArray* cookies) {
+                NSHTTPCookie* cookie;
+                NSString* cookieValue = nil;
+                CDVPluginResult* pluginResult = nil;
+                for(cookie in cookies){
+                    if([cookie.name isEqualToString:cookieName]) {
+                        cookieValue = cookie.value;
+                        break;
+                    }
+                }
+                
+                if (cookieValue != nil)
+                {
+                     pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:@{@"cookieValue":cookieValue}];
+                                   [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+                }
+                else
+                {
+                    
+                     pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"No cookie found"];
+                               [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+                }
+             }];
+        }else
         {
-            pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:@{@"cookieValue":cookieValue}];
+            pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"URL was null"];
+            [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
         }
-        else
-        {
-            pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"No cookie found"];
-        }
-
     }
     else
     {
         pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"URL was null"];
+        [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
     }
-
-    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
  - (void)setCookieValue:(CDVInvokedUrlCommand*)command
