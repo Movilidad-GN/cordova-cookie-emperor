@@ -15,7 +15,7 @@ Feel free to contribute, pull-requests will be reviewed.
 
 Install with Cordova CLI
 
-    $ cordova plugin add https://github.com/RTK/cordova-cookie-emperor.git
+    $ cordova plugin add https://github.com/Movilidad-GN/cordova-cookie-emperor.git
 
 ## Usage
 A global object cookieEmperor will be bound to the window object.
