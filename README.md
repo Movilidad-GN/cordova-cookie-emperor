@@ -7,6 +7,8 @@ I came to the conclusion to fork this project and keep it maintained to a certai
 
 Feel free to contribute, pull-requests will be reviewed.
 
+In this fork, is used WKWebsiteDataStore and WKWebsiteDataStore to obtain cookies.
+
 ## Supported Platforms
 * Android
 * iOS
